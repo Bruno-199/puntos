@@ -1,4 +1,4 @@
-const apiUrl = "http://localhost:3000";
+const apiUrl = "https://puntos-eeoo.onrender.com";
 if (!localStorage.getItem("token")) {
     window.location.href = "login.html";
 } else {
