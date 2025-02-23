@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Sistema de Puntos</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <button onclick="cerrarSesion()" class="logout-btn">Cerrar sesión</button>
+
+    <div class="container" id="admin-panel" style="display: none;">
+       
+        <div class="panel right-panel">
+            <div class="section">
+                <h2>Sumar Puntos</h2>
+                <input type="text" id="dni-cliente" placeholder="DNI del Cliente">
+                <button onclick="sumarPuntos()" class="action-btn">Sumar 10 Puntos</button>
+            </div>
+            <div class="section">
+                <h2>Registrar Nuevo Usuario</h2>
+                <input type="text" id="nombre" placeholder="Nombre">
+                <input type="text" id="dni" placeholder="DNI">
+                <input type="text" id="telefono" placeholder="Teléfono">
+                <button onclick="registrarUsuario()" class="action-btn">Registrar Usuario</button>
+            </div>
+        </div>
+
+
+        <div class="panel left-panel">
+            <h2>Sistema de Puntos</h2>
+            <div class="section">
+                <h3>Clientes</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>DNI</th>
+                            <th>Teléfono</th>
+                            <th>Puntos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientes-table">
+                        <!-- Los clientes se cargarán dinámicamente aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Puntos</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <h1>Login de Admin</h1>
+            <input type="password" id="password" placeholder="Contraseña de admin">
+            <button onclick="login()">Ingresar</button>
+        </div>
+    </div>
+
+    <script>
+        const apiUrl = "http://localhost:3000"; // Asegúrate de que sea la URL correcta
+
+        async function login() {
+            const password = document.getElementById("password").value;
+
+            try {
+                const res = await fetch(`${apiUrl}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password })
+                });
+
+                const data = await res.json();
+                if (data.message) {
+                    // Si la respuesta es exitosa, almacena el "token" (aunque ya no es necesario)
+                    localStorage.setItem("token", "dummy-token"); // Ya no usamos JWT, solo un valor dummy
+                    window.location.href = "index.html"; // Redirige al panel de admin
+                } else {
+                    alert("Acceso denegado");
+                }
+            } catch (error) {
+                console.error("Error al iniciar sesión:", error);
+            }
+        }
+
+        // Si ya está logueado, redirige automáticamente
+        if (localStorage.getItem("token")) {
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
