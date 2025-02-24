@@ -18,10 +18,11 @@ app.use(express.static(path.join(__dirname)));
 // Database configuration
 const db = mysql.createPool({
     connectionLimit: 10,
-    ...Object.fromEntries(
-        ['HOST', 'USER', 'PASSWORD', 'NAME', 'PORT']
-        .map(key => [`${key.toLowerCase()}`, process.env[`DB_${key}`]])
-    )
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME, // Cambiado de 'name' a 'database'
+    port: process.env.DB_PORT
 });
 
 // Routes

@@ -3,14 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <meta name="description" content="Sistema de Puntos - Panel de Administración">
+    <meta name="theme-color" content="#5c5cff">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="no-referrer">
     <title>Admin - Sistema de Puntos</title>
     <link rel="stylesheet" href="index.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
     <nav class="nav-header">
         <h1 class="nav-title">Sistema de Puntos</h1>
-        <button onclick="cerrarSesion()" class="logout-btn">Cerrar sesión</button>
+        <div class="nav-actions">
+            <span id="connection-status" class="connection-badge">🟢 Conectado</span>
+            <button onclick="cerrarSesion()" class="logout-btn">Cerrar sesión</button>
+        </div>
     </nav>
 
     <main class="container" id="admin-panel" style="display: none;">
@@ -19,20 +27,43 @@
                 <article class="card">
                     <div class="section">
                         <h2>Sumar Puntos</h2>
-                        <div class="input-group">
-                            <input type="text" id="dni-cliente" placeholder="DNI del Cliente" required>
-                            <button onclick="sumarPuntos()" class="action-btn">Sumar 10 Puntos</button>
-                        </div>
+                        <form onsubmit="event.preventDefault(); sumarPuntos();" class="input-group">
+                            <input type="text" 
+                                   id="dni-cliente" 
+                                   placeholder="DNI del Cliente" 
+                                   pattern="[0-9]{8}" 
+                                   maxlength="8"
+                                   autocomplete="off"
+                                   required>
+                            <button type="submit" class="action-btn">Sumar 10 Puntos</button>
+                        </form>
                     </div>
                 </article>
 
                 <article class="card">
                     <div class="section">
                         <h2>Registrar Usuario</h2>
-                        <form class="input-group" onsubmit="event.preventDefault(); registrarUsuario();">
-                            <input type="text" id="nombre" placeholder="Nombre" required>
-                            <input type="text" id="dni" placeholder="DNI" required>
-                            <input type="tel" id="telefono" placeholder="Teléfono" required>
+                        <form onsubmit="event.preventDefault(); registrarUsuario();" class="input-group">
+                            <input type="text" 
+                                   id="nombre" 
+                                   placeholder="Nombre completo" 
+                                   pattern="[A-Za-zÁáÉéÍíÓóÚúÑñ\s]{3,50}"
+                                   autocomplete="off"
+                                   required>
+                            <input type="text" 
+                                   id="dni" 
+                                   placeholder="DNI" 
+                                   pattern="[0-9]{8}"
+                                   maxlength="8"
+                                   autocomplete="off"
+                                   required>
+                            <input type="tel" 
+                                   id="telefono" 
+                                   placeholder="Teléfono" 
+                                   pattern="[0-9]{9}"
+                                   maxlength="9"
+                                   autocomplete="off"
+                                   required>
                             <button type="submit" class="action-btn">Registrar Usuario</button>
                         </form>
                     </div>
@@ -44,6 +75,7 @@
                     <div class="section">
                         <h2>Lista de Clientes</h2>
                         <div class="table-responsive">
+                            
                             <table>
                                 <thead>
                                     <tr>
@@ -62,15 +94,17 @@
         </div>
     </main>
 
-    <div id="modal" class="modal">
+    <div id="modal" class="modal" role="dialog" aria-labelledby="modal-message">
         <div class="modal-content">
-            <span id="modal-emoji"></span>
             <p id="modal-message"></p>
             <button onclick="closeModal()" class="modal-btn">Aceptar</button>
         </div>
     </div>
 
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js" 
+    integrity="sha512-Xm9qbB6Pu06k3PUwPj785dyTl6oHxgsv9nHp7ej7nCpAqGZT3OZpsELuCYX05DdonFpTlBpXMOxjavIAIUwr0w==" 
+    crossorigin="anonymous" 
+    referrerpolicy="no-referrer"></script>
+        <script src="index.js" defer></script>
 </body>
 </html>
