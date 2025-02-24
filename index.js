@@ -1,10 +1,18 @@
 const apiUrl = "https://puntos-eeoo.onrender.com";
+const socket = io(apiUrl);
+
 if (!localStorage.getItem("token")) {
     window.location.href = "login.html";
 } else {
     document.getElementById("admin-panel").style.display = "block";
     cargarClientes();
 }
+
+// Escuchar eventos de socket.io
+socket.on('actualizacion-puntos', () => {
+    cargarClientes(); // Recargar la lista cuando hay cambios
+});
+
 async function cargarClientes() {
     try {
         const res = await fetch(`${apiUrl}/clientes`);

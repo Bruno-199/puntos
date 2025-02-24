@@ -3,8 +3,18 @@ const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const path = require("path");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
 app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname)));
@@ -53,6 +63,9 @@ app.post("/sumar-puntos", (req, res) => {
     db.query("UPDATE usuarios1 SET puntos = puntos + 10 WHERE dni = ?", [dni], (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
         if (result.affectedRows === 0) return res.status(404).json({ error: "Cliente no encontrado" });
+        
+        // Emitir actualización a todos los clientes
+        io.emit('actualizacion-puntos');
         res.json({ message: "Puntos sumados con éxito" });
     });
 });
@@ -67,10 +80,13 @@ app.post("/registrar-usuario", (req, res) => {
         [nombre, dni, telefono], 
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
+            
+            // Emitir actualización a todos los clientes
+            io.emit('actualizacion-puntos');
             res.json({ message: "Usuario registrado con éxito" });
         }
     );
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
+httpServer.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
