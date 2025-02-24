@@ -3,22 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de Puntos - Login">
     <title>Login - Sistema de Puntos</title>
     <link rel="stylesheet" href="login.css">
 </head>
 <body>
-    <div class="login-container">
+    <main class="login-container">
         <div class="login-card">
             <h1>Login de Admin</h1>
-            <input type="password" id="password" placeholder="Contraseña de admin">
-            <button onclick="login()">Ingresar</button>
+            <form onsubmit="handleSubmit(event)" autocomplete="off">
+                <input type="password" id="password" placeholder="Contraseña de admin" required>
+                <button type="submit">Ingresar</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span id="modal-emoji"></span>
+            <p id="modal-message"></p>
+            <button onclick="closeModal()" class="modal-btn">Aceptar</button>
         </div>
     </div>
 
     <script>
-        const apiUrl = "https://puntos-eeoo.onrender.com"; // Asegúrate de que sea la URL correcta
+        const apiUrl = "https://puntos-eeoo.onrender.com";
+        
+        if (localStorage.getItem("token")) {
+            window.location.href = "index.html";
+        }
 
-        async function login() {
+        function showModal(message, isSuccess = true) {
+            const modal = document.getElementById('modal');
+            const modalEmoji = document.getElementById('modal-emoji');
+            const modalMessage = document.getElementById('modal-message');
+            
+            modalEmoji.textContent = isSuccess ? '✅' : '❌';
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
             const password = document.getElementById("password").value;
 
             try {
@@ -27,23 +58,19 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ password })
                 });
-
                 const data = await res.json();
+                
                 if (data.message) {
-                    // Si la respuesta es exitosa, almacena el "token" (aunque ya no es necesario)
-                    localStorage.setItem("token", "dummy-token"); // Ya no usamos JWT, solo un valor dummy
-                    window.location.href = "index.html"; // Redirige al panel de admin
+                    showModal("Login exitoso", true);
+                    localStorage.setItem("token", "true");
+                    setTimeout(() => window.location.href = "index.html", 1000);
                 } else {
-                    alert("Acceso denegado");
+                    showModal("Contraseña incorrecta", false);
                 }
             } catch (error) {
-                console.error("Error al iniciar sesión:", error);
+                console.error("Error:", error);
+                showModal("Error al iniciar sesión", false);
             }
-        }
-
-        // Si ya está logueado, redirige automáticamente
-        if (localStorage.getItem("token")) {
-            window.location.href = "index.html";
         }
     </script>
 </body>
