@@ -1,4 +1,7 @@
-const apiUrl = "https://puntos-eeoo.onrender.com";
+const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000'
+    : 'https://puntos-eeoo.onrender.com';
+
 const socket = io(apiUrl, {
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
@@ -7,7 +10,6 @@ const socket = io(apiUrl, {
 
 // Estado de la aplicación
 let isConnected = false;
-let lastUpdate = null;
 
 // Autenticación
 if (!localStorage.getItem("token")) {
@@ -35,12 +37,6 @@ function updateConnectionStatus(connected) {
     const status = document.getElementById('connection-status');
     status.textContent = connected ? '🟢 Conectado' : '🔴 Desconectado';
     status.style.backgroundColor = connected ? 'rgba(92,255,92,0.1)' : 'rgba(255,92,92,0.1)';
-}
-
-function updateLastUpdate() {
-    const span = document.getElementById('last-update');
-    lastUpdate = new Date();
-    span.textContent = `Última actualización: ${lastUpdate.toLocaleTimeString()}`;
 }
 
 function showModal(message, isSuccess = true) {
@@ -71,13 +67,20 @@ async function cargarClientes() {
                     <td>${dni}</td>
                     <td>${telefono}</td>
                     <td>${puntos}</td>
+                    <td>
+                        <button onclick="borrarCliente('${dni}')" 
+                                class="delete-btn" 
+                                title="Borrar cliente">
+                            ❌
+                        </button>
+                    </td>
                 </tr>`
             ).join('');
-        
-        updateLastUpdate();
     } catch (error) {
         console.error("Error:", error);
-        showModal("Error al cargar clientes", false);
+        if (document.getElementById('modal').style.display !== 'flex') {
+            showModal("Error al cargar clientes", false);
+        }
     }
 }
 
@@ -104,7 +107,6 @@ async function registrarUsuario() {
         return acc;
     }, {});
 
-    // Validaciones
     if (!datos.nombre.match(/^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]{3,50}$/)) {
         showModal("Nombre inválido", false);
         return;
@@ -120,11 +122,9 @@ async function registrarUsuario() {
 
     const resultado = await realizarPeticion('registrar-usuario', datos);
     if (resultado.success) {
-        inputs.forEach(id => {
-            const input = document.getElementById(id);
-            input.value = '';
-        });
-        document.getElementById('nombre').focus();
+        inputs.forEach(id => document.getElementById(id).value = '');
+        showModal("Usuario registrado exitosamente", true);
+        await cargarClientes();
     }
 }
 
@@ -133,21 +133,43 @@ async function realizarPeticion(endpoint, datos) {
         const res = await fetch(`${apiUrl}/${endpoint}`, {
             method: "POST",
             headers: { 
-                "Content-Type": "application/json",
-                "X-Requested-With": "XMLHttpRequest"
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(datos)
         });
 
-        if (!res.ok) throw new Error('Error en la petición');
-        
         const data = await res.json();
-        showModal(data.message || data.error, !!data.message);
-        return { success: !!data.message };
+        
+        if (!res.ok) {
+            throw new Error(data.error || 'Error en la operación');
+        }
+        
+        showModal(data.message, true);
+        return { success: true };
     } catch (error) {
         console.error(`Error en ${endpoint}:`, error);
-        showModal('Error en la operación', false);
+        showModal(error.message || 'Error en la operación', false);
         return { success: false };
+    }
+}
+
+async function borrarCliente(dni) {
+    if (!confirm(`¿Estás seguro de que deseas eliminar al cliente con DNI ${dni}?`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`${apiUrl}/borrar-cliente`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dni })
+        });
+
+        const data = await res.json();
+        showModal(data.message || "Cliente eliminado exitosamente", true);
+        await cargarClientes();
+    } catch (error) {
+        showModal("Error al eliminar cliente", false);
     }
 }
 

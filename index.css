@@ -281,3 +281,24 @@ th {
 .hidden {
     display: none !important;
 }
+
+/* Agregar al final del archivo */
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-speed);
+}
+
+.delete-btn:hover {
+    transform: scale(1.2);
+    background-color: rgba(255, 92, 92, 0.1);
+}
+
+/* Ajustar la tabla para el nuevo botón */
+th:last-child, td:last-child {
+    width: 50px;
+    text-align: center;
+}
