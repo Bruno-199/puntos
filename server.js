@@ -53,6 +53,18 @@ const db = mysql.createPool({
 });
 
 // 4. Rutas API
+
+// Agregar después de las configuraciones y antes de las otras rutas API
+app.post("/login", async (req, res) => {
+    const { password } = req.body;
+    
+    if (password === process.env.ADMIN_PASS) {
+        res.json({ message: "Login exitoso" });
+    } else {
+        res.status(401).json({ error: "Contraseña incorrecta" });
+    }
+});
+
 app.post("/borrar-cliente", async (req, res) => {
     const { dni } = req.body;
     
