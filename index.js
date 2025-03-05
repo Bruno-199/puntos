@@ -86,16 +86,27 @@ async function cargarClientes() {
 
 async function sumarPuntos() {
     const dniInput = document.getElementById("dni-cliente");
+    const montoInput = document.getElementById("monto-compra");
     const dni = dniInput.value.trim();
+    const monto = parseInt(montoInput.value);
 
     if (!dni.match(/^\d{8}$/)) {
         showModal("DNI debe tener 8 dígitos", false);
         return;
     }
 
-    const resultado = await realizarPeticion('sumar-puntos', { dni });
+    if (isNaN(monto) || monto < 1) {
+        showModal("Monto inválido", false);
+        return;
+    }
+
+    // Calcular puntos como 1% del monto, redondeado hacia abajo
+    const puntos = Math.floor(monto * 0.01);
+
+    const resultado = await realizarPeticion('sumar-puntos', { dni, puntos });
     if (resultado.success) {
         dniInput.value = '';
+        montoInput.value = '';
         dniInput.focus();
     }
 }

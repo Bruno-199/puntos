@@ -30,9 +30,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem;
+    padding: 0.5rem;
     background-color: var(--card-background);
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     box-shadow: var(--shadow);
 }
 

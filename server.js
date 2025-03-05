@@ -87,14 +87,22 @@ app.get("/clientes", async (_, res) => {
 });
 
 app.post("/sumar-puntos", async (req, res) => {
-    const { dni } = req.body;
+    const { dni, puntos } = req.body;
     if (!dni) return res.status(400).json({ error: "DNI requerido" });
+    if (!puntos) return res.status(400).json({ error: "Puntos requeridos" });
 
     try {
-        const [result] = await db.promise().query("UPDATE usuarios1 SET puntos = puntos + 10 WHERE dni = ?", [dni]);
-        if (result.affectedRows === 0) return res.status(404).json({ error: "Cliente no encontrado" });
+        const [result] = await db.promise().query(
+            "UPDATE usuarios1 SET puntos = puntos + ? WHERE dni = ?", 
+            [puntos, dni]
+        );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Cliente no encontrado" });
+        }
+        
         io.emit('actualizacion-puntos');
-        res.json({ message: "Puntos sumados con éxito" });
+        res.json({ message: `${puntos} puntos sumados con éxito` });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
