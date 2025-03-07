@@ -13,96 +13,75 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-    <nav class="nav-header">
-        <h1 class="nav-title">Sistema de Puntos</h1>
-        <div class="nav-actions">
-            <span id="connection-status" class="connection-badge">🟢 Conectado</span>
-            <button onclick="cerrarSesion()" class="logout-btn">Cerrar sesión</button>
-        </div>
-    </nav>
+   
 
     <main class="container" id="admin-panel" style="display: none;">
-        <div class="panels-container">
-            <section class="panel action-panel">
-                <article class="card">
-                    <div class="section">
-                        <h2>Sumar Puntos</h2>
-                        <form onsubmit="event.preventDefault(); sumarPuntos();" class="input-group">
-                            <input type="text" 
-                                   id="dni-cliente" 
-                                   placeholder="DNI del Cliente" 
-                                   pattern="[0-9]{8}" 
-                                   maxlength="8"
-                                   autocomplete="off"
-                                   required>
-                            <input type="number" 
-                                   id="monto-compra" 
-                                   placeholder="Monto de compra" 
-                                   min="1"
-                                   step="1"
-                                   autocomplete="off"
-                                   required>
-                            <button type="submit" class="action-btn">Sumar Puntos</button>
-                        </form>
-                    </div>
-                </article>
+        <header class="nav-header">
+            <h1 class="nav-title">Sistema de Puntos</h1>
+            <div class="nav-actions">
+                <span id="connection-status" class="connection-badge">🔴 Desconectado</span>
+                <button onclick="cerrarSesion()" class="logout-btn">Cerrar Sesión</button>
+            </div>
+        </header>
 
-                <article class="card">
-                    <div class="section">
-                        <h2>Registrar Usuario</h2>
-                        <form onsubmit="event.preventDefault(); registrarUsuario();" class="input-group">
-                            <input type="text" 
-                                   id="nombre" 
-                                   placeholder="Nombre completo" 
-                                   pattern="[A-Za-zÁáÉéÍíÓóÚúÑñ\s]{3,50}"
-                                   autocomplete="off"
-                                   required>
-                            <input type="text" 
-                                   id="dni" 
-                                   placeholder="DNI" 
-                                   pattern="[0-9]{8}"
-                                   maxlength="8"
-                                   autocomplete="off"
-                                   required>
-                            <input type="tel" 
-                                   id="telefono" 
-                                   placeholder="Teléfono" 
-                                   pattern="[0-9]{9}"
-                                   maxlength="9"
-                                   autocomplete="off"
-                                   required>
-                            <button type="submit" class="action-btn">Registrar Usuario</button>
-                        </form>
+        <div class="dashboard-container">
+            <!-- Panel izquierdo - Tabla -->
+            <section class="table-panel">
+                <div class="card">
+                    <h2>Lista de Clientes</h2>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>DNI</th>
+                                    <th>Teléfono</th>
+                                    <th>Puntos</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientes-table"></tbody>
+                        </table>
                     </div>
-                </article>
+                </div>
             </section>
 
-            <section class="panel table-panel">
-                <article class="card">
-                    <div class="section">
-                        <h2>Lista de Clientes</h2>
-                        <div class="table-responsive">
-                            
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>DNI</th>
-                                        <th>Teléfono</th>
-                                        <th>Puntos</th>
-                                        <th>       </th>
-                                    </tr>
-                                </thead>
-                                <tbody id="clientes-table"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </article>
+            <!-- Panel derecho - Botones de acción -->
+            <section class="actions-panel">
+                <button class="action-card" onclick="showActionModal('register')">
+                    <span class="action-icon">👤</span>
+                    <span class="action-text">Registrar Usuario</span>
+                </button>
+                <button class="action-card" onclick="showActionModal('search')">
+                    <span class="action-icon">🔍</span>
+                    <span class="action-text">Buscar Puntos</span>
+                </button>
+                <button class="action-card" onclick="showActionModal('add')">
+                    <span class="action-icon">➕</span>
+                    <span class="action-text">Sumar Puntos</span>
+                </button>
+                <button class="action-card" onclick="showActionModal('subtract')">
+                    <span class="action-icon">➖</span>
+                    <span class="action-text">Restar Puntos</span>
+                </button>
             </section>
         </div>
     </main>
 
-    <div id="modal" class="modal" role="dialog" aria-labelledby="modal-message">
+    <!-- Modal de acciones -->
+    <div id="actionModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title"></h2>
+            <div id="modal-form-container"></div>
+            <div class="modal-actions">
+                <button onclick="closeActionModal()" class="modal-btn cancel-btn">Cancelar</button>
+                <button onclick="handleModalAction()" class="modal-btn confirm-btn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de mensajes -->
+    <div id="messageModal" class="modal">
         <div class="modal-content">
             <span id="modal-emoji"></span>
             <p id="modal-message"></p>

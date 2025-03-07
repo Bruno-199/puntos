@@ -11,24 +11,21 @@ const app = express();
 const httpServer = createServer(app);
 
 // 2. Configuraciones de CORS y Socket.IO
-const io = new Server(httpServer, {
-    cors: {
-        origin: ["http://localhost:3000", "http://127.0.0.1:5500", "https://puntos-eeoo.onrender.com"],
-        methods: ["GET", "POST"],
-        credentials: true
-    }
-});
-
-// Actualizar la configuración de CORS
 const corsOptions = {
     origin: ["http://localhost:3000", "http://127.0.0.1:5500", "https://puntos-eeoo.onrender.com"],
     methods: ["GET", "POST"],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Accept"]
+    allowedHeaders: ["Content-Type", "Accept"],
+    optionsSuccessStatus: 200 // algunos navegadores necesitan esto
 };
 
-// 3. Middleware básico - IMPORTANTE: antes de las rutas
 app.use(cors(corsOptions));
+
+const io = new Server(httpServer, {
+    cors: corsOptions
+});
+
+// 3. Middleware básico - IMPORTANTE: antes de las rutas
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -79,10 +76,16 @@ app.post("/borrar-cliente", async (req, res) => {
 
 app.get("/clientes", async (_, res) => {
     try {
-        const [results] = await db.promise().query("SELECT nombre, dni, telefono, puntos FROM usuarios1");
+        const [results] = await db.promise().query(
+            "SELECT nombre, dni, telefono, puntos FROM usuarios1"
+        );
         res.json(results);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Error al cargar clientes:", err);
+        res.status(500).json({ 
+            error: "Error al cargar clientes",
+            details: err.message 
+        });
     }
 });
 
@@ -117,7 +120,57 @@ app.post("/registrar-usuario", async (req, res) => {
     try {
         await db.promise().query("INSERT INTO usuarios1 (nombre, dni, telefono, puntos) VALUES (?, ?, ?, 0)", [nombre, dni, telefono]);
         io.emit('actualizacion-puntos');
-        res.json({ message: "Usuario registrado con éxito" });
+        res.json({ message: "Usuario registrado con éxito", success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/buscar-puntos/:dni", async (req, res) => {
+    const { dni } = req.params;
+    
+    try {
+        const [results] = await db.promise().query(
+            "SELECT puntos FROM usuarios1 WHERE dni = ?",
+            [dni]
+        );
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Cliente no encontrado" });
+        }
+
+        res.json({ puntos: results[0].puntos });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post("/restar-puntos", async (req, res) => {
+    const { dni, puntos } = req.body;
+    
+    try {
+        // Verificar si el cliente existe y tiene suficientes puntos
+        const [cliente] = await db.promise().query(
+            "SELECT puntos FROM usuarios1 WHERE dni = ?",
+            [dni]
+        );
+
+        if (cliente.length === 0) {
+            return res.status(404).json({ error: "Cliente no encontrado" });
+        }
+
+        if (cliente[0].puntos < puntos) {
+            return res.status(400).json({ error: "Puntos insuficientes" });
+        }
+
+        // Restar puntos
+        await db.promise().query(
+            "UPDATE usuarios1 SET puntos = puntos - ? WHERE dni = ?",
+            [puntos, dni]
+        );
+
+        io.emit('actualizacion-puntos');
+        res.json({ message: `Se han restado ${puntos} puntos exitosamente` });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
