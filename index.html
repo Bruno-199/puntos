@@ -89,6 +89,18 @@
         </div>
     </div>
 
+    <!-- Modal de confirmación para eliminar -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <span class="modal-emoji">⚠️</span>
+            <p class="modal-message">¿Estás seguro que deseas eliminar este cliente?</p>
+            <div class="modal-buttons">
+                <button onclick="confirmarEliminacion()" class="confirm-btn">Sí, eliminar</button>
+                <button onclick="closeConfirmModal()" class="cancel-btn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js" 
     integrity="sha512-Xm9qbB6Pu06k3PUwPj785dyTl6oHxgsv9nHp7ej7nCpAqGZT3OZpsELuCYX05DdonFpTlBpXMOxjavIAIUwr0w==" 
     crossorigin="anonymous" 

@@ -155,10 +155,21 @@ async function registrarUsuario() {
     const telefono = document.getElementById('telefono')?.value.trim();
 
     if (!nombre || !dni || !telefono) {
-        throw new Error('Todos los campos son requeridos');
+        showModal("Por favor, complete todos los campos", false);
+        return;
     }
 
-    return await realizarPeticion('registrar-usuario', { nombre, dni, telefono });
+    try {
+        const response = await realizarPeticion('registrar-usuario', { nombre, dni, telefono });
+        
+        if (response.success) {
+            showModal("¡Cliente registrado exitosamente! 😊", true);
+            closeActionModal();
+            await cargarClientes();
+        }
+    } catch (error) {
+        showModal(error.message || "Error al registrar cliente. ¡El DNI ya existe!", false);
+    }
 }
 
 async function sumarPuntos() {
@@ -264,7 +275,7 @@ async function cargarClientes() {
                     <td>${telefono}</td>
                     <td>${puntos}</td>
                     <td>
-                        <button onclick="borrarCliente('${dni}')" 
+                        <button onclick="mostrarConfirmacion('${dni}')" 
                                 class="delete-btn" 
                                 title="Borrar cliente">
                             ❌
@@ -376,3 +387,70 @@ document.querySelectorAll('form').forEach(form => {
         setTimeout(() => isSubmitting = false, 1000);
     });
 });
+
+let clienteAEliminar = null;
+
+function mostrarConfirmacion(dni) {
+    clienteAEliminar = dni;
+    const modal = document.getElementById('confirmModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.style.opacity = '1';
+    }
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('confirmModal');
+    if (modal) {
+        modal.style.opacity = '0';
+        setTimeout(() => {
+            modal.style.display = 'none';
+            clienteAEliminar = null;
+        }, 300);
+    }
+}
+
+async function confirmarEliminacion() {
+    if (!clienteAEliminar) return;
+    
+    try {
+        const response = await fetch(`${apiUrl}/borrar-cliente`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ dni: clienteAEliminar })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            showModal('Cliente eliminado exitosamente', true);
+            await cargarClientes();
+        } else {
+            showModal(data.error || 'Error al eliminar cliente', false);
+        }
+    } catch (error) {
+        showModal('Error al conectar con el servidor', false);
+    } finally {
+        closeConfirmModal();
+        clienteAEliminar = null;
+    }
+}
+
+// Modificar la función que crea la tabla para usar el nuevo modal
+function crearFilaCliente(cliente) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>${cliente.nombre}</td>
+        <td>${cliente.dni}</td>
+        <td>${cliente.telefono}</td>
+        <td>${cliente.puntos}</td>
+        <td>
+            <button onclick="mostrarConfirmacion('${cliente.dni}')" class="delete-btn">
+                Eliminar
+            </button>
+        </td>
+    `;
+    return tr;
+}

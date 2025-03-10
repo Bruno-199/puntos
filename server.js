@@ -118,11 +118,20 @@ app.post("/registrar-usuario", async (req, res) => {
     }
 
     try {
-        await db.promise().query("INSERT INTO usuarios1 (nombre, dni, telefono, puntos) VALUES (?, ?, ?, 0)", [nombre, dni, telefono]);
+        await db.promise().query(
+            "INSERT INTO usuarios1 (nombre, dni, telefono, puntos) VALUES (?, ?, ?, 0)", 
+            [nombre, dni, telefono]
+        );
         io.emit('actualizacion-puntos');
         res.json({ message: "Usuario registrado con éxito", success: true });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        // Personalizar mensaje de error para DNI duplicado
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ 
+                error: "¡Este DNI ya está registrado en el sistema! Por favor, verifica el número." 
+            });
+        }
+        res.status(500).json({ error: "Error al registrar usuario. Por favor, intente nuevamente." });
     }
 });
 
